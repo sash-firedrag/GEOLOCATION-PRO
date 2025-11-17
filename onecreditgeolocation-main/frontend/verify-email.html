@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - GeoAttendance Pro</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-map-marker-alt"></i>
+                GeoAttendance Pro
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html" class="nav-link">Login</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="form-container">
+        <div class="form-box">
+            <h2 class="form-title">
+                <i class="fas fa-envelope"></i> Email Verification
+            </h2>
+            <div id="verificationMessage">
+                <div class="loading"></div>
+                <p>Verifying your email address...</p>
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="login.html" class="btn secondary-btn" style="margin-right: 1rem;">
+                    <i class="fas fa-sign-in-alt"></i> Back to Login
+                </a>
+                <a href="index.html" class="btn primary-btn">
+                    <i class="fas fa-home"></i> Go Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Get token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        if (token) {
+            verifyEmail(token);
+        } else {
+            showMessage('No verification token found in the URL.', 'error');
+        }
+
+        async function verifyEmail(token) {
+            try {
+                const response = await fetch(`/api/verify-email?token=${token}`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(result.message, 'success');
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Verification failed: ' + error.message, 'error');
+            }
+        }
+
+        function showMessage(message, type) {
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            const color = type === 'success' ? '#4CAF50' : '#ff4757';
+            
+            document.getElementById('verificationMessage').innerHTML = `
+                <div class="alert alert-${type}">
+                    <i class="fas ${icon}" style="font-size: 3rem; margin-bottom: 1rem; color: ${color};"></i>
+                    <h3 style="margin-bottom: 1rem;">${type === 'success' ? 'Success!' : 'Error!'}</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

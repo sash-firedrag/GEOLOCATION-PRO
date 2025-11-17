@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login - GeoAttendance Pro</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-map-marker-alt"></i>
+                GeoAttendance Pro
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="signup.html" class="nav-link">Sign Up</a>
+                </li>
+                <li class="nav-item">
+                    <a href="admin-login.html" class="nav-link admin-btn">Admin Login</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="form-container">
+        <div class="form-box">
+            <h2 class="form-title">
+                <i class="fas fa-user"></i> User Login
+            </h2>
+            
+            <!-- Email Verification Notice -->
+            <div id="verificationNotice" style="display: none; background: rgba(255,193,7,0.2); border: 1px solid #ffc107; border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem;">
+                <p style="margin: 0; color: #ffc107; font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> 
+                    <strong>New users:</strong> Check your email for verification link after signing up.
+                </p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-input" id="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn primary-btn" style="width: 100%;">
+                    <i class="fas fa-sign-in-alt"></i> Login to Dashboard
+                </button>
+            </form>
+
+            <!-- Resend Verification Section -->
+            <div id="resendVerification" style="display: none; margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                <p style="margin: 0 0 1rem 0; color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                    <i class="fas fa-envelope"></i> 
+                    Didn't receive the verification email?
+                </p>
+                <button id="resendBtn" class="btn secondary-btn" style="width: 100%; padding: 10px;">
+                    <i class="fas fa-paper-plane"></i> Resend Verification Email
+                </button>
+            </div>
+
+            <div style="text-align: center; margin-top: 1rem;">
+                <a href="signup.html" style="color: rgba(255, 255, 255, 0.8); text-decoration: none;">
+                    Don't have an account? Sign up here
+                </a>
+            </div>
+            <div style="text-align: center; margin-top: 0.5rem;">
+                <a href="admin-login.html" style="color: rgba(255, 255, 255, 0.8); text-decoration: none;">
+                    Admin Login
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        let unverifiedEmail = '';
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const button = e.target.querySelector('button');
+            UIUtils.setLoading(button, true);
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const result = await ApiService.login(username, password);
+                
+                if (result.message === 'Login successful') {
+                    AuthService.setUser({ username });
+                    UIUtils.showAlert('Login successful! Redirecting...', 'success');
+                    
+                    setTimeout(() => {
+                        if (username === 'admin') {
+                            window.location.href = 'admin-dashboard.html';
+                        } else {
+                            window.location.href = 'user-dashboard.html';
+                        }
+                    }, 1000);
+                }
+            } catch (error) {
+                // Handle email verification required
+                if (error.message.includes('verify your email') || error.message.includes('Please verify')) {
+                    UIUtils.showAlert(
+                        'Please verify your email before logging in. Check your inbox for the verification link.', 
+                        'error'
+                    );
+                    
+                    // Show resend verification option
+                    document.getElementById('resendVerification').style.display = 'block';
+                    unverifiedEmail = error.email || '';
+                    
+                    // Auto-fill email if available for resend
+                    if (error.email) {
+                        console.log('Unverified email:', error.email);
+                    }
+                } else {
+                    UIUtils.showAlert(error.message, 'error');
+                }
+            } finally {
+                UIUtils.setLoading(button, false);
+            }
+        });
+
+        // Resend verification email
+        document.getElementById('resendBtn').addEventListener('click', async () => {
+            const button = document.getElementById('resendBtn');
+            const username = document.getElementById('username').value;
+            
+            if (!unverifiedEmail && !username) {
+                UIUtils.showAlert('Please enter your username first to resend verification.', 'error');
+                return;
+            }
+
+            UIUtils.setLoading(button, true);
+            
+            try {
+                // If we don't have email from error response, use username to get it
+                let emailToResend = unverifiedEmail;
+                
+                if (!emailToResend) {
+                    // In a real app, you might want to add an API to get email by username
+                    // For now, we'll show a message
+                    UIUtils.showAlert('Please try logging in again to see resend option.', 'error');
+                    return;
+                }
+
+                const result = await ApiService.request('/resend-verification', {
+                    method: 'POST',
+                    body: JSON.stringify({ email: emailToResend })
+                });
+                
+                UIUtils.showAlert('Verification email sent! Please check your inbox.', 'success');
+                document.getElementById('resendVerification').style.display = 'none';
+                
+            } catch (error) {
+                UIUtils.showAlert('Failed to resend verification: ' + error.message, 'error');
+            } finally {
+                UIUtils.setLoading(button, false);
+            }
+        });
+
+        // Show verification notice for new users
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if user came from signup page
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('from') === 'signup') {
+                document.getElementById('verificationNotice').style.display = 'block';
+                UIUtils.showAlert('Please check your email for verification link before logging in.', 'success');
+            }
+
+            // Check if already logged in
+            if (AuthService.isLoggedIn()) {
+                if (AuthService.isAdmin()) {
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    window.location.href = 'user-dashboard.html';
+                }
+            }
+        });
+
+        // Clear resend section when username changes
+        document.getElementById('username').addEventListener('input', () => {
+            document.getElementById('resendVerification').style.display = 'none';
+            unverifiedEmail = '';
+        });
+    </script>
+</body>
+</html>

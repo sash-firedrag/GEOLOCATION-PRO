@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoAttendance Pro - Smart Location-Based Attendance</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-map-marker-alt"></i>
+                GeoAttendance Pro
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="about.html" class="nav-link">About</a>
+                </li>
+                <li class="nav-item">
+                    <a href="contact.html" class="nav-link">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html" class="nav-link login-btn">User Login</a>
+                </li>
+                <li class="nav-item">
+                    <a href="admin-login.html" class="nav-link admin-btn">Admin Login</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Smart Location-Based Attendance System</h1>
+                <p class="hero-description">
+                    Track employee attendance with GPS precision. Modern, secure, and efficient workforce management solution with real-time location verification.
+                </p>
+                <div class="hero-buttons">
+                    <a href="signup.html" class="btn primary-btn">
+                        <i class="fas fa-user-plus"></i> Get Started Free
+                    </a>
+                    <a href="login.html" class="btn secondary-btn">
+                        <i class="fas fa-sign-in-alt"></i> User Login
+                    </a>
+                    <a href="admin-login.html" class="btn admin-btn">
+                        <i class="fas fa-cog"></i> Admin Portal
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="floating-card">
+                    <i class="fas fa-clock"></i>
+                    <h3>Real-time Tracking</h3>
+                    <p>Instant punch in/out with location verification</p>
+                </div>
+                <div class="floating-card">
+                    <i class="fas fa-map-pin"></i>
+                    <h3>GPS Verification</h3>
+                    <p>Ensure attendance from designated locations</p>
+                </div>
+                <div class="floating-card">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Smart Analytics</h3>
+                    <p>Comprehensive reports and insights</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose Our System?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Secure & Reliable</h3>
+                    <p>Military-grade encryption for your attendance data with session-based authentication</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Mobile Friendly</h3>
+                    <p>Works seamlessly on all devices with responsive design</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Fast & Efficient</h3>
+                    <p>Quick punch-in/punch-out with one-click location capture</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <h3>Geofencing</h3>
+                    <p>Restrict attendance to specific geographic locations</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-user-cog"></i>
+                    <h3>Admin Dashboard</h3>
+                    <p>Complete overview of all employee attendance records</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Real-time Reports</h3>
+                    <p>Generate instant reports and analytics</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background: rgba(0,0,0,0.1); padding: 2rem; text-align: center; color: white; margin-top: 4rem;">
+        <p>&copy; 2024 GeoAttendance Pro. All rights reserved.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+
+        if (hamburger) {
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+        }
+
+        // Close mobile menu when clicking on links
+        document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            navMenu.classList.remove('active');
+        }));
+
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            if (AuthService.isLoggedIn()) {
+                if (AuthService.isAdmin()) {
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    window.location.href = 'user-dashboard.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

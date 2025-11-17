@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - GeoAttendance Pro</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-map-marker-alt"></i>
+                GeoAttendance Pro
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html" class="nav-link">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a href="admin-login.html" class="nav-link admin-btn">Admin Login</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="form-container">
+        <div class="form-box">
+            <h2 class="form-title">
+                <i class="fas fa-user-plus"></i> Create Account
+            </h2>
+            <form id="signupForm">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-input" id="username" placeholder="Choose a username" required>
+                    <small style="color: rgba(255,255,255,0.7); font-size: 0.8rem;">
+                        Must be unique. Cannot be "admin".
+                    </small>
+                </div>
+                
+                <!-- ADDED EMAIL FIELD -->
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" id="email" placeholder="Enter your email" required>
+                    <small style="color: rgba(255,255,255,0.7); font-size: 0.8rem;">
+                        We'll send a verification link to this email
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="password" placeholder="Create a password" required>
+                    <small style="color: rgba(255,255,255,0.7); font-size: 0.8rem;">
+                        Use a strong password for security.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" class="form-input" id="confirmPassword" placeholder="Confirm your password" required>
+                </div>
+                <button type="submit" class="btn primary-btn" style="width: 100%;">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+            <div style="text-align: center; margin-top: 1rem;">
+                <a href="login.html" style="color: rgba(255, 255, 255, 0.8); text-decoration: none;">
+                    Already have an account? Login here
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const button = e.target.querySelector('button');
+            UIUtils.setLoading(button, true);
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value; // NEW
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Basic validation
+            if (password !== confirmPassword) {
+                UIUtils.showAlert('Passwords do not match!', 'error');
+                UIUtils.setLoading(button, false);
+                return;
+            }
+
+            if (username.toLowerCase() === 'admin') {
+                UIUtils.showAlert('Username "admin" is reserved!', 'error');
+                UIUtils.setLoading(button, false);
+                return;
+            }
+
+            // Email validation
+            if (!email.includes('@') || !email.includes('.')) {
+                UIUtils.showAlert('Please enter a valid email address!', 'error');
+                UIUtils.setLoading(button, false);
+                return;
+            }
+
+            try {
+                // UPDATED: Pass email to signup function
+                const result = await ApiService.signup(username, password, email);
+                
+                if (result.requiresVerification) {
+                    UIUtils.showAlert(
+                        'Account created! Please check your email for verification link. ' +
+                        'You must verify your email before logging in.', 
+                        'success'
+                    );
+                    
+                    // Optional: Show verification link for testing
+                    if (result.verificationLink) {
+                        console.log('Verification Link:', result.verificationLink);
+                    }
+                    
+                    setTimeout(() => {
+                         window.location.href = 'login.html?from=signup';
+                    }, 4000);
+                } else {
+                    UIUtils.showAlert('Account created successfully! Redirecting to login...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                }
+                
+            } catch (error) {
+                UIUtils.showAlert(error.message, 'error');
+            } finally {
+                UIUtils.setLoading(button, false);
+            }
+        });
+
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            if (AuthService.isLoggedIn()) {
+                if (AuthService.isAdmin()) {
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    window.location.href = 'user-dashboard.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

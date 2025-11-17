@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - GeoAttendance Pro</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-map-marker-alt"></i>
+                GeoAttendance Pro
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="admin-dashboard.html" class="nav-link">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link logout-btn" onclick="AuthService.logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>Admin Dashboard 👑</h1>
+                <p>Complete overview of all employee attendance records</p>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalRecords">0</div>
+                    <div>Total Records</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeToday">0</div>
+                    <div>Active Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="uniqueUsers">0</div>
+                    <div>Unique Users</div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="action-buttons">
+                <button class="punch-btn" onclick="refreshData()">
+                    <i class="fas fa-sync-alt"></i> Refresh Data
+                </button>
+                <button class="punch-btn out" onclick="exportData()">
+                    <i class="fas fa-download"></i> Export Report
+                </button>
+            </div>
+
+            <!-- All Attendance Records -->
+            <div style="margin-top: 3rem;">
+                <h2 style="color: white; margin-bottom: 1rem;">
+                    <i class="fas fa-users"></i> All Attendance Records
+                </h2>
+                <div class="data-table">
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Punch In</th>
+                                <th>Punch Out</th>
+                                <th>Duration</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allAttendanceTable">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem;">
+                                    <div class="loading"></div>
+                                    <div>Loading attendance data...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Check admin authentication
+        if (!AuthService.requireAdmin()) {
+            window.location.href = 'admin-login.html';
+        }
+
+        // Load all attendance data
+        async function loadAllAttendance() {
+            try {
+                const attendance = await ApiService.getAllAttendance();
+                displayAllAttendance(attendance);
+                updateAdminStats(attendance);
+            } catch (error) {
+                UIUtils.showAlert('Failed to load attendance data: ' + error.message, 'error', document.querySelector('.dashboard-container'));
+            }
+        }
+
+        function displayAllAttendance(attendance) {
+            const table = document.getElementById('allAttendanceTable');
+            
+            if (attendance.length === 0) {
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem;">
+                            No attendance records found.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            table.innerHTML = attendance.map(record => `
+                <tr>
+                    <td><strong>${record.username}</strong></td>
+                    <td>${UIUtils.formatDate(record.punchInTime)}</td>
+                    <td>${record.punchOutTime ? UIUtils.formatDate(record.punchOutTime) : 'Not punched out'}</td>
+                    <td>${UIUtils.formatDuration(record.punchInTime, record.punchOutTime)}</td>
+                    <td>${record.location ? `${record.location.lat.toFixed(6)}, ${record.location.lon.toFixed(6)}` : 'N/A'}</td>
+                    <td>
+                        <span style="color: ${record.punchOutTime ? '#2ed573' : '#ffa502'};">
+                            ${record.punchOutTime ? 'Completed' : 'Active'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateAdminStats(attendance) {
+            document.getElementById('totalRecords').textContent = attendance.length;
+            
+            const today = new Date().toDateString();
+            const activeToday = attendance.filter(record => 
+                new Date(record.punchInTime).toDateString() === today
+            ).length;
+            document.getElementById('activeToday').textContent = activeToday;
+            
+            const uniqueUsers = [...new Set(attendance.map(record => record.username))];
+            document.getElementById('uniqueUsers').textContent = uniqueUsers.length;
+        }
+
+        function refreshData() {
+            loadAllAttendance();
+            UIUtils.showAlert('Data refreshed successfully!', 'success', document.querySelector('.dashboard-container'));
+        }
+
+        function exportData() {
+            // Simple export functionality
+            const table = document.getElementById('allAttendanceTable');
+            let csv = 'User,Punch In,Punch Out,Duration,Location,Status\n';
+            
+            table.querySelectorAll('tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length > 0) {
+                    const rowData = Array.from(cells).map(cell => {
+                        let text = cell.textContent.trim();
+                        // Escape commas and quotes for CSV
+                        if (text.includes(',') || text.includes('"')) {
+                            text = '"' + text.replace(/"/g, '""') + '"';
+                        }
+                        return text;
+                    });
+                    csv += rowData.join(',') + '\n';
+                }
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `attendance-report-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            UIUtils.showAlert('Report exported successfully!', 'success', document.querySelector('.dashboard-container'));
+        }
+
+        // Initialize admin dashboard
+        document.addEventListener('DOMContentLoaded', loadAllAttendance);
+    </script>
+</body>
+</html>

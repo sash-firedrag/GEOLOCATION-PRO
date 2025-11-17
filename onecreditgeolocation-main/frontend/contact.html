@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - GeoAttendance Pro</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-map-marker-alt"></i>
+                GeoAttendance Pro
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="about.html" class="nav-link">About</a>
+                </li>
+                <li class="nav-item">
+                    <a href="contact.html" class="nav-link">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html" class="nav-link login-btn">User Login</a>
+                </li>
+                <li class="nav-item">
+                    <a href="admin-login.html" class="nav-link admin-btn">Admin Login</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>Contact Us</h1>
+                <p>Get in touch with our team for support and inquiries</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-envelope" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h3>Email Support</h3>
+                    <p>support@geoattendance.com</p>
+                    <small>We respond within 24 hours</small>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-phone" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h3>Phone Support</h3>
+                    <p>+1 (555) 123-4567</p>
+                    <small>Mon-Fri, 9AM-6PM EST</small>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h3>Live Chat</h3>
+                    <p>Available 24/7</p>
+                    <small>Instant support</small>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
+                <div>
+                    <h2 style="color: white; margin-bottom: 1rem;">Send us a Message</h2>
+                    <form id="contactForm" style="background: var(--glass-bg); padding: 2rem; border-radius: 15px; border: 1px solid var(--glass-border);">
+                        <div class="form-group">
+                            <label class="form-label">Your Name</label>
+                            <input type="text" class="form-input" id="name" placeholder="Enter your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-input" id="email" placeholder="Enter your email" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subject</label>
+                            <input type="text" class="form-input" id="subject" placeholder="Enter subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Message</label>
+                            <textarea class="form-input" id="message" placeholder="Enter your message" rows="5" required style="resize: vertical;"></textarea>
+                        </div>
+                        <button type="submit" class="btn primary-btn" style="width: 100%;">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+
+                <div>
+                    <h2 style="color: white; margin-bottom: 1rem;">Frequently Asked Questions</h2>
+                    <div style="background: var(--glass-bg); padding: 2rem; border-radius: 15px; border: 1px solid var(--glass-border);">
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4 style="color: var(--danger); margin-bottom: 0.5rem;">
+                                <i class="fas fa-question-circle"></i> How does location tracking work?
+                            </h4>
+                            <p style="color: rgba(255,255,255,0.8);">Our system uses HTML5 Geolocation API to capture precise GPS coordinates when you punch in/out.</p>
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4 style="color: var(--danger); margin-bottom: 0.5rem;">
+                                <i class="fas fa-question-circle"></i> Is my data secure?
+                            </h4>
+                            <p style="color: rgba(255,255,255,0.8);">Yes, we use session-based authentication and secure data encryption to protect your information.</p>
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4 style="color: var(--danger); margin-bottom: 0.5rem;">
+                                <i class="fas fa-question-circle"></i> Can I use this on mobile?
+                            </h4>
+                            <p style="color: rgba(255,255,255,0.8);">Absolutely! Our system is fully responsive and works perfectly on all mobile devices.</p>
+                        </div>
+                        <div>
+                            <h4 style="color: var(--danger); margin-bottom: 0.5rem;">
+                                <i class="fas fa-question-circle"></i> How do I reset my password?
+                            </h4>
+                            <p style="color: rgba(255,255,255,0.8);">Contact our support team, and we'll help you reset your password securely.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const button = e.target.querySelector('button');
+            UIUtils.setLoading(button, true);
+
+            // Simulate form submission
+            setTimeout(() => {
+                UIUtils.showAlert('Thank you for your message! We will get back to you soon.', 'success', document.querySelector('.dashboard-container'));
+                document.getElementById('contactForm').reset();
+                UIUtils.setLoading(button, false);
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
